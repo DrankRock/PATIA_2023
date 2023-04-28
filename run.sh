@@ -1,5 +1,27 @@
 #!/bin/bash
 
+function help {
+  echo "Usage: ./run.sh [OPTIONS] [ARGUMENTS]"
+  echo ""
+  echo "Arguments:"
+  echo "  m, make       - Compile the code"
+  echo "  r, run        - Run the code"
+  echo "  mr, make-run  - Compile and run the code"
+  echo "  -h, --help    - Show this help"
+  echo ""
+  echo "Options:"
+  echo "  -p <problem>  - Specify the problem.pddl to run"
+  echo "  -d <domain>    - Specify the domain.pddl to run"
+  echo ""
+  echo "Notes : By default, the problem and domain are for hanoi"
+  echo ""
+}
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+	help
+	exit 1
+fi
+
 parameter1=$2
 arg1=$3
 parameter2=$4

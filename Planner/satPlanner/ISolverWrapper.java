@@ -13,7 +13,6 @@ import org.sat4j.specs.ISolver;
 /**
  * Wrapper of the solver object to be able to properly add clauses and goals, 
  * remove the previous goals, and translate back (hopefully transkating *)
- * @author matvei
  *
  */
 public class ISolverWrapper {

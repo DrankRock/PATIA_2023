@@ -4,8 +4,6 @@ import java.io.PrintStream;
 
 /**
  * Utils function
- * @author matvei
- *
  */
 public class Utils {
 	final static boolean DEBUG = false;

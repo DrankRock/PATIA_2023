@@ -33,7 +33,6 @@ import picocli.CommandLine;
 /**
  * OurPlanner class is used to plan, solve etc the problem.
  * It initializes everything and calls the execution loop
- * @author matvei
  *
  */
 public class OurPlanner extends AbstractPlanner {

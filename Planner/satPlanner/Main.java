@@ -6,7 +6,6 @@ import fr.uga.pddl4j.planners.InvalidConfigurationException;
 
 /**
  * Main class to use all the other and launch the solving
- * @author matvei
  *
  */
 public class Main {

@@ -30,8 +30,6 @@ import org.sat4j.specs.ISolver;
 
 /**
  * The name is inaccurate, but it transform a problem into a SAT problem.
- * 
- * @author matvei
  *
  */
 public class PddlToProblem {
