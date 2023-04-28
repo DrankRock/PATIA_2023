@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+/**
+ * Class used to convert an input json file with a certain format into a pddl file suiting our
+ * implementation of the Sokoban problem
+ */
 public class jsonToDomain {
     enum Direction {
         UP,
