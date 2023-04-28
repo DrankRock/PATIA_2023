@@ -776,7 +776,9 @@ if __name__ == "__main__":
     if not os.path.exists("jsonToDomain.class") or not os.path.exists("Tuple.class"):
     	print("Compiling java files")
     	os.system('javac {} {}'.format("jsonToDomain.java", "Tuple.java"))
-
+    if not os.path.exists('./__tmp__'):
+        print("'__tmp__' folder is necessary to correctly function. Creating it .. ")
+        os.makedirs('./__tmp__')
     app = QtWidgets.QApplication(sys.argv)
     w = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
