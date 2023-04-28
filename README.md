@@ -90,18 +90,8 @@ Nous avons choisi de créer un programme pour résoudre le problème de Poursuit
 
 Afin de résoudre ces problèmes, vous pouvez lancer la commande : 
 
-```
- java -cp lib/pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF
-       Poursuite-Evasion/domaine.pddl
-       Poursuite-Evasion/p01.pddl
-       -t 1000
-```
+`java -cp lib/pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF Poursuite-Evasion/domaine.pddl Poursuite-Evasion/p01.pddl -t 1000`
 
 ou
 
-```
- java -cp lib/pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF
-       Poursuite-Evasion/domaine.pddl
-       Poursuite-Evasion/p02.pddl
-       -t 1000
-```
+`java -cp lib/pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF Poursuite-Evasion/domaine.pddl Poursuite-Evasion/p02.pddl -t 1000`
