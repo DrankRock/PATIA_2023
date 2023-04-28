@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 /**
  * Class used to convert an input json file with a certain format into a pddl file suiting our
  * implementation of the Sokoban problem
+ *
+ * Note : Guard, pusher, player, person, Clovis, any name is about the sole character of the sokoban
  */
 public class jsonToDomain {
     enum Direction {
@@ -21,6 +23,7 @@ public class jsonToDomain {
 
     boolean DEBUG = true;
 
+    // All the arraylists used to print the different predicates
     ArrayList<String> printConnected_AL = new ArrayList<String>(); // printed 6
     ArrayList<String> printDirection_AL = new ArrayList<String>(); // printed 7
     ArrayList<String> printIsClear_AL = new ArrayList<String>(); // printed 5
@@ -36,18 +39,24 @@ public class jsonToDomain {
 
     String problem_name;
 
+    /**
+     * Main function. To our own despair, this main class is not very OOP.
+     * It takes the files as arguments, and does all the conversion from Json to pddl
+     * @param args command line arguments
+     */
     public void run(String [] args){
         problem_name= "Sokoban-problem";
         if (args.length != 3){
-            System.out.println("Error in the arguments.\nUsage : java jsonToDomain.java <path/to/json/file.json>");
+            System.out.println("Error in the arguments.\nUsage : java jsonToDomain.java <path/to/json/file.json> <name of the problem> <DEBUG>");
             System.exit(0);
-            
         }
         problem_name = args[1];
         DEBUG = Boolean.valueOf(args[2].toLowerCase());
         /* Read level design from file */
         BufferedReader reader;
         String levelDesign = null;
+
+        // Read the input json file and stores the important line in levelDesign
 		try {
 			reader = new BufferedReader(new FileReader(args[0]));
 			String line = reader.readLine();
@@ -69,15 +78,20 @@ public class jsonToDomain {
 		} catch (IllegalArgumentException e){
             e.printStackTrace();
         }
+
         /* Convert data from design level to domain.pddl */
+        // trimming unused parts
         levelDesign = levelDesign.replace("\\n", "newline").replace("\"testIn\": \"", "").replace("\",", "");
+        // converting newlines to actual rows
         String[] level = levelDesign.split("newline");
         int maxWidth=-1;
+        // calculate the max row width
         for(int i=0; i<level.length; i++){
             if (level[i].length() > maxWidth){
                 maxWidth = level[i].length();
             }
         }
+        // print the level
         for(int i=0; i<level.length; i++){
             int n = maxWidth - level[i].length();
             level[i] = level[i]+" ".repeat(n);
@@ -88,14 +102,12 @@ public class jsonToDomain {
 
         variableName = new String[level[0].length()][level.length];
         Tuple player = null;
-        //HashMap<String, Tuple> boxLoc = new HashMap<>();
-        //HashMap<String, Tuple> targetLoc = new HashMap<>();
-        //HashMap<String, Tuple> floorsLoc = new HashMap<>();
 
         floorsList = new HashMap<Tuple, String>();
         boxesList = new HashMap<Tuple, String>();
         targetList = new HashMap<Tuple, String>();
 
+        // for each space of the level, parse it, and store the level in a char[]
         for(int i=0; i<level.length; i++){
             for(int j=0; j<level[i].length(); j++){
                 char it = level[i].charAt(j);
@@ -111,8 +123,6 @@ public class jsonToDomain {
                         floorsList.put(currentTuple.copy(), floorName);
                         this.printIsClear_AL.add(printIsClear(floorName));
                         this.printNotIsTarget_AL.add(printNotIsTarget(floorName));
-                        //variableName[x][y] = "floor"+"_"+x+"_"+y;
-                        //floorsLoc.put("floor"+"_"+x+"_"+y, currentTuple.copy());
                         break;
                     case '.': // empty floor with target
                         floorsList.put(currentTuple.copy(), floorName);
@@ -120,8 +130,6 @@ public class jsonToDomain {
                         targetList.put(currentTuple.copy(), targetName);
                         printIsTarget_AL.add(printIsTarget(floorName));
                         printIsClear_AL.add(printIsClear(floorName));
-                        //targetLoc.put("target"+"_"+x+"_"+y, currentTuple).copy();
-                        //floorsLoc.put("floor"+"_"+x+"_"+y, currentTuple.copy());
                         break;
                     case '$': // floor with box
                         floorsList.put(currentTuple.copy(), floorName);
@@ -129,8 +137,6 @@ public class jsonToDomain {
                         boxesList.put(currentTuple.copy(), boxName);
                         printHasBoxOn_AL.add(printHasBoxOn(floorName, boxName));
                         this.printNotIsTarget_AL.add(printNotIsTarget(floorName));
-                        //boxLoc.put("box"+"_"+x+"_"+y, currentTuple.copy());
-                        //floorsLoc.put("floor"+"_"+x+"_"+y, currentTuple.copy());
                         break;
                     case '*': // box on target
                         floorsList.put(currentTuple.copy(), floorName);
@@ -151,7 +157,6 @@ public class jsonToDomain {
                         player =  currentTuple.copy();
                         printPusherIsOn_AL.add(printPusherIsOn(floorName));
                         this.printNotIsTarget_AL.add(printNotIsTarget(floorName));
-                        //floorsLoc.put("floor"+"_"+x+"_"+y, currentTuple.copy());
                         break;
                     case '+': //player on target
                         floorsList.put(currentTuple.copy(), floorName);
@@ -163,9 +168,6 @@ public class jsonToDomain {
                         String targetName3 = "target"+"_"+x+"_"+y;
                         targetList.put(currentTuple.copy(), targetName3);
                         printIsTarget_AL.add(printIsTarget(floorName));
-                        //player = new Tuple(i, j);
-                        //targetLoc.put("target"+"_"+x+"_"+y, currentTuple.copy());
-                        //floorsLoc.put("floor"+"_"+x+"_"+y, currentTuple.copy());
                         break;
                     case '#': // walls are ignored
                     default:
@@ -180,25 +182,8 @@ public class jsonToDomain {
             throw new IllegalArgumentException("Error : no guard was found");
         }
         /* Add connections and directions from level array and tilename array */
-        //System.out.println("Current player location : "+player);
         findConnections(player);
         print_all();
-    }
-    public ArrayList<Character> cellsAround(int x, int y){
-        ArrayList<Character> ret = new ArrayList<>();
-        if (x-1 > 0){
-            ret.add(charLevel[x-1][y]);
-        }
-        if (x+1 < charLevel.length){
-            ret.add(charLevel[x+1][y]);
-        }
-        if (y-1 > 0){
-            ret.add(charLevel[x][y-1]);
-        }
-        if (y+1 < charLevel[0].length){
-            ret.add(charLevel[x][y+1]);
-        }
-        return ret;
     }
     public String printConnected(String name1, String name2){
         return "(connected "+name1+" "+name2+")";
@@ -206,27 +191,64 @@ public class jsonToDomain {
     public String printDirection(String from, String to, Direction direction){
         return "(tileInDirectionOf "+direction+" "+from+" "+to+")";
         // to est au "nord" de from
-    } 
+    }
 
+    /**
+     * Returns a string of a clear floor
+     * @param floor the name of this floor tile
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printIsClear(String floor){
         return "(isClear "+floor+")";
-    } 
+    }
+    /**
+     * Returns a string of a target floor
+     * @param floor the name of this target tile
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printIsTarget(String target){
         return "(isTarget "+target+")";
-    } 
+    }
+    /**
+     * Returns a string of a clear floor with a box on it
+     * @param floor the name of this floor tile
+     * @param box the name of the box object that is on this tile
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printHasBoxOn(String floor, String box){
         return "(hasBoxOn "+floor+" "+box+")";
-    }  
+    }
+    /**
+     * Returns a string of a floor with a pusher / guard on it
+     * @param floor the name of this floor tile
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printPusherIsOn(String floor){
         return "(pusherIsOn "+floor+")";
-    }  
+    }
+    /**
+     * Returns a string of a box that is on a target
+     * @param floor the name of this box
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printOnTarget(String box){
         return "(onTarget "+box+")";
     }
+    /**
+     * Returns a string of a clear floor that is not a target
+     * @param floor the name of this floor tile
+     * @return the String that will be printed in the problem.pddl
+     */
     public String printNotIsTarget(String floor){
         return "(NotIsTarget "+floor+")";
     }
 
+    /**
+     * Find the connections between all the tiles by procedurally going through all the possible tiles
+     * The objective is to represent this whole level as a graphe. The starting point is the player, to ensure that
+     * there we don't start at a tile that is not accessible by the guard. If there is such a tile, it will be ignored
+     * @param playerLocation the location of the player
+     */
     public void findConnections(Tuple playerLocation){
         ArrayList<Tuple> seenTuples = new ArrayList<>();
         ArrayList<Tuple> toSee = new ArrayList<>();
@@ -254,23 +276,23 @@ public class jsonToDomain {
 
     }
 
+    /**
+     * Print everything that was previously parsed into the console
+     * Note that it's fine like that, because the execution script redirects the console output into a variable.
+     */
     public void print_all(){
         String toPrint ="";
         printTab(0, "(define (problem "+problem_name+")");
         printTab(1, "(:domain SOKOBAN)");
         printTab(1, "(:objects ");
-        // Print Types :
-        /*
-         *  box tile direction - objects
-            floor - tile
-            // target is directly as isTarget or onTarget
-         */
+
         // Directions : 
         for (Direction d : Direction.values()){
             toPrint+=d.name()+" ";
         }
         toPrint+=" - direction";
         printTab(2, toPrint);
+
         // Floor :
         toPrint = "";
         for (Entry<Tuple, String> entry : floorsList.entrySet()){
@@ -278,6 +300,7 @@ public class jsonToDomain {
         }
         toPrint += " - floor";
         printTab(2, toPrint);
+
         // boxes :
         toPrint = "";
         for (Entry<Tuple, String> entry : boxesList.entrySet()){
@@ -285,53 +308,63 @@ public class jsonToDomain {
         }
         toPrint += "- box";
         printTab(2, toPrint);
+
         // end objects :
         printTab(1, ")");
         printTab(1, "");
+
         // start init
         printTab(1, "(:init");
+
         // print pusher :
         printTab(2, "");
         printTab(2, "; Pusher is on tile :");
         for(String pusher : printPusherIsOn_AL){
             printTab(2, pusher);
         }
+
         // print targets :
         printTab(2, "");
         printTab(2, "; Targets are on tiles :");
         for(String target : printIsTarget_AL){
             printTab(2, target);
         }
+
         // print not targets :
         printTab(2, "");
         printTab(2, "; Targets are NOT on tiles :");
         for(String target : printNotIsTarget_AL){
             printTab(2, target);
         }
+
         // print boxes :
         printTab(2, "");
         printTab(2, "; Bpxes are on tiles :");
         for(String box : printHasBoxOn_AL){
             printTab(2, box);
         }
+
         // print boxes on target
         printTab(2, "");
         printTab(2, "; Boxes are on target :");
         for(String box : printOnTarget_AL){
             printTab(2, box);
         }
+
         // print clear floors
         printTab(2, "");
         printTab(2, "; Floor is clear :");
         for(String floor : printIsClear_AL){
             printTab(2, floor);
         }
+
         // print connected floors
         printTab(2, "");
         printTab(2, "; Floor 1 is connected to Floor 2:");
         for(String floor : printConnected_AL){
             printTab(2, floor);
         }
+
         // print direction floors, so the graph
         printTab(2, "");
         printTab(2, "; Going from floor 1, in the direction Direct, you'll find floor 2");
@@ -340,6 +373,8 @@ public class jsonToDomain {
         }
         printTab(1, ")");
         printTab(1, "");
+
+        // print goal
         printTab(1, "(:goal");
         printTab(2, "(and");
         for (Entry<Tuple, String> entry : boxesList.entrySet()){
@@ -351,6 +386,11 @@ public class jsonToDomain {
 
     }
 
+    /**
+     * print a string with a certain amount of tabulation before it, to ensure a good indentation.
+     * @param n_tab the number of tabulations
+     * @param s the string to print
+     */
     private void printTab(int n_tab, String s){
         String toPrint = "";
         for (int i=0; i<n_tab; i++){
@@ -359,17 +399,32 @@ public class jsonToDomain {
         System.out.println(toPrint+s);
     }
 
+    /**
+     * print a string only if the DEBUG variable is at true (set from the command line)
+     * line ends with a newline
+     * @param s the String to print
+     */
     private void dPrintln(String s){
         if (DEBUG) {
             System.out.println(s);
         }
     }
+    /**
+     * print a string only if the DEBUG variable is at true (set from the command line)
+     * @param s the String to print
+     */
     private void dPrint(String s){
         if (DEBUG) {
             System.out.print(s);
         }
     }
 
+    /**
+     * Find all the tiles around a tile, getting it by its x and y position
+     * @param current the tuple containg the coordinates of the tile
+     * @return a hashmap containing the coordin&ates of each tile, for each direction in which there is a tile
+     * that is not a wall, and does exist
+     */
     public HashMap<Tuple, Direction> findAround(Tuple current){
         HashMap<Tuple, Direction> ret = new HashMap<Tuple, Direction>();
         int x = current.x; int y = current.y;
@@ -387,22 +442,13 @@ public class jsonToDomain {
         }
         return ret;
     }
-/**
- * (isClear ?f - floor) ;tile of type floor has nothing on it
-    (isTarget ?f - floor) ; tile of type floor is a target
-    (hasBoxOn ?f - floor ?b - box) ; floor f is occupied by box b
-    (pusherIsOn ?f - floor) ;position of pusher on f
-    (connected ?from - floor ?to - floor) ;connected tiles
-    (tileInDirectionOf ?d - direction ?t1 - floor ?t2 - floor) ; t1 --d--> t2
-    (onTarget ?b - box)
-)
- * @param args
- */
 
+    /**
+     * Main, launches everything.
+     * @param args
+     */
     public static void main(String[] args){
         jsonToDomain jtd = new jsonToDomain();
-        Tuple tuple = new Tuple(0, 0);
-        //System.out.println("Tuple : "+tuple);
         jtd.run(args);
     }
 }
