@@ -4,7 +4,7 @@ Ce repo contient le rendu pour le projet de Patia de Clarisse Deschamps et Matve
 
 ### Mise en place
 ```bash
-git clone 
+git clone https://github.com/DrankRock/PATIA_2023.git
 ```
 
 ## Sokoban
@@ -19,3 +19,6 @@ Depuis un Terminal :
 
 Dans la fenetre qui s'ouvre, vous pouvez charger un problème, puis le résoudre. Ci dessous, une video montrant les fonctionnalités
 
+https://user-images.githubusercontent.com/32172257/235259469-c47eaf10-2e77-409b-a775-35602c8a9b2e.mp4
+
+Nous vous conseillons de ne pas utiliser autre chose que HSP. Nous utilisons les mêmes commandes Java que celles sur la documentation, mais il semble que certaines soient très lentes.
