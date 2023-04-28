@@ -82,3 +82,10 @@ memory used:      0.22 MBytes for problem representation
                   0.00 MBytes for searching
                   0.22 MBytes total
 ```
+
+## Poursuite - Evasion
+### Travail Accomplis
+Pour le rendu, il etait demandé de rendre un exercice parmis une liste.   
+Nous avons choisis de créer un programme pour résoudre le problème de Poursuite - Evasion. Notre domaine et deux exemples de problèmes sont disponibles dans le dossier [Poursuite-Evasion](https://github.com/DrankRock/PATIA_2023/tree/main/Poursuite-Evasion).
+
+Malheuresement, nous n'avons pas de script de lancement sur ce dépôt, ils sont sur le reseau de l'IM2AG. Nous pouvons cependant vous l'envoyer si vous le souhaitez dès que possible. Nous l'ajouterons dans tous les cas à ce dépôt dès que nous l'aurons.
